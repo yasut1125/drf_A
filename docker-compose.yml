@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: django_postgres
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - app-net
+  web:
+    build: .
+    volumes:
+      - ./src:/src
+    ports:
+      - "8000:8000"
+    working_dir: /src
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    tty: true
+    depends_on:
+      - db
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
